@@ -1,0 +1,78 @@
+package com;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.dom4j.DocumentException;
+
+import com._163._163NewCollection;
+import com._163._163Rule;
+import com.sina.SinaNewCollection;
+import com.sina.SinaRule;
+import com.yahoo.YahooNewCollection;
+import com.yahoo.YahooRule;
+
+/*
+ * 按配置文件抓取新闻
+ */
+public class Crawler{
+	public void crawler(RuleObject ruleObject){
+		String newSource=ruleObject.getNewSource();	 
+		String url=ruleObject.getUrl(); 			 
+		String urlFilter=ruleObject.getUrlFilter();	 
+		String newsType=ruleObject.getNewsType();		 
+		if(newsType==null){
+			newsType = "";
+		}
+		
+		RuleStrategy ruleStrategy = null;
+		NewCollection newCollection = null;
+		LinkParser linkParser = new LinkParser();
+		
+		List<String> list = new ArrayList<String>();
+		if("sina".equals(newSource)){
+			ruleStrategy = new SinaRule();
+			newCollection = new SinaNewCollection();
+		}
+		if("_163".equals(newSource)){
+			ruleStrategy = new _163Rule();
+			newCollection = new _163NewCollection();
+		}
+		if("yahoo".equals(newSource)){
+			ruleStrategy = new YahooRule();
+			newCollection = new YahooNewCollection();
+		}
+		
+		if(ruleStrategy!=null){
+			urlFilter = ruleStrategy.urlFilterStrategy(urlFilter);
+			System.out.println("链接："+url);
+			System.out.println("链接规则："+urlFilter);
+			linkParser.setUrl(url);
+			linkParser.setUrlFilter(urlFilter);
+			list = linkParser.filterLinks();
+			System.out.println("链接数量："+list.size());
+			for(int i=0;i<list.size();i++){
+				newCollection.parser((String)list.get(i));
+				
+			}
+		}else{
+			System.out.println("策略规则ruleStrategy 加载失败");
+		}
+	}
+	
+	public static void main(String[] args){
+		Crawler crawler = new Crawler();
+		RuleXmlParser ruleXmlParser = new RuleXmlParser();
+		List<RuleObject> list = null;
+		
+		try {
+			list = ruleXmlParser.parserXml("rule.xml");
+			for(int i=0;i<list.size();i++){
+				RuleObject ruleObject = list.get(i);
+				crawler.crawler(ruleObject);
+			}
+		} catch (DocumentException e) {
+			e.printStackTrace();
+		}
+	}
+}

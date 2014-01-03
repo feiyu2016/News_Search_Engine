@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+        "http://java.sun.com/j2ee/dtd/web-jsptaglibrary_1_2.dtd">
+
+<!--
+  listlib Taglib Library Descriptor
+ 
+  Version: $Id: listlib.tld,v 1.3 2002/07/10 01:26:27 pixel Exp $
+  -->
+
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>1.2</jsp-version>
+    <short-name>listlist Taglib</short-name>
+    <uri></uri>
+    <description>listlib Taglib</description>
+
+    <tag>
+      <name>init</name>
+      <tag-class>com.bitmechanic.listlib.InitTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>true</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+      <attribute>
+         <name>class</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+      <attribute>
+         <name>listCreator</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+      <attribute>
+         <name>max</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>hasResults</name>
+      <tag-class>com.bitmechanic.listlib.HasResultsTag</tag-class>
+      <description></description>
+      
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>hasNoResults</name>
+      <tag-class>com.bitmechanic.listlib.HasNoResultsTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>prop</name>
+      <tag-class>com.bitmechanic.listlib.PropTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+      <attribute>
+         <name>property</name>
+         <required>true</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>hasPrev</name>
+      <tag-class>com.bitmechanic.listlib.HasPrevTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>hasNext</name>
+      <tag-class>com.bitmechanic.listlib.HasNextTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>prevLink</name>
+      <tag-class>com.bitmechanic.listlib.PrevLinkTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>nextLink</name>
+      <tag-class>com.bitmechanic.listlib.NextLinkTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>iterate</name>
+      <tag-class>com.bitmechanic.listlib.IterateTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+    <tag>
+      <name>iterateProp</name>
+      <tag-class>com.bitmechanic.listlib.IteratePropTag</tag-class>
+      <description></description>
+
+      <attribute>
+         <name>name</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+      <attribute>
+         <name>property</name>
+         <required>true</required>
+         <rtexprvalue>true</rtexprvalue>
+      </attribute>
+
+    </tag>
+
+
+</taglib>

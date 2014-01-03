@@ -1,0 +1,113 @@
+package com;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.htmlparser.Node;
+import org.htmlparser.NodeFilter;
+import org.htmlparser.Parser;
+import org.htmlparser.filters.NodeClassFilter;
+import org.htmlparser.filters.OrFilter;
+import org.htmlparser.tags.LinkTag;
+import org.htmlparser.util.NodeList;
+import org.htmlparser.util.ParserException;
+
+/**
+　*　 搜集新闻链接地址。将符合正则表达式的URL添加到URL数组中。
+　*/
+public class LinkParser {
+	private String url = "";
+	private String urlFilter="";
+	
+	
+	//通过正则表达式过滤一个网页上的所有链接
+	public List<String> filterLinks() {
+		List<String> links = new ArrayList<String>();
+		try {
+			Parser parser = new Parser(url);
+			//parser.setEncoding("gb2312");
+			// 过滤 <frame >标签的 filter，用来提取 frame 标签里的 src 属性所表示的链接
+			NodeFilter frameFilter = new NodeFilter() {
+				public boolean accept(Node node) {
+					if (node.getText().startsWith("frame src=")) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			};
+			// OrFilter 来设置过滤 <a> 标签，和 <frame> 标签
+			OrFilter linkFilter = new OrFilter(new NodeClassFilter(LinkTag.class), frameFilter);
+			// 得到所有经过过滤的标签
+			NodeList list = parser.extractAllNodesThatMatch(linkFilter);
+			for (int i = 0; i < list.size(); i++) {
+				Node tag = list.elementAt(i);
+				if (tag instanceof LinkTag)// <a> 标签
+				{
+					LinkTag link = (LinkTag) tag;
+					String linkUrl = link.getLink();//url
+					if (accept(linkUrl,urlFilter)) {
+						links.add(linkUrl);
+					}
+				} else// <frame> 标签
+				{
+					// 提取 frame 里 src 属性的链接如 <frame src="test.html"/>
+					String frame = tag.getText();
+					int start = frame.indexOf("src=");
+					frame = frame.substring(start);
+					int end = frame.indexOf(" ");
+					if (end == -1) {
+						end = frame.indexOf(">");
+					}
+					String frameUrl = frame.substring(5, end - 1);
+					if (accept(frameUrl,urlFilter)) {
+						links.add(frameUrl);
+					}
+				}
+			}
+		} catch (ParserException e) {
+			e.printStackTrace();
+		}
+		return links;
+	}
+	
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public void setUrlFilter(String urlFilter) {
+		this.urlFilter = urlFilter;
+	}
+
+	private boolean accept(String url,String filterRule) {
+		//if (url.matches("http://news.sohu.com/[\\d]+/n[\\d]+.shtml")) {
+		if (url.matches(filterRule)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	//测试主页新闻，可以得到主页上所有符合要求的网页地址
+	public static void main(String[] args) {
+		List<String> links = new ArrayList<String>();
+//		String url = "http://news.sohu.com/";
+//		String urlFilter = "http://news.sohu.com/20110616/n[\\d]+.shtml";
+//		String url = "http://mil.news.sina.com.cn/";
+//		String urlFilter = "http://mil.news.sina.com.cn/2011-06-20/[\\d]+.html";
+		String url = "http://sports.163.com/";
+		String urlFilter = "http://sports.163.com/[\\d]+/[\\d]+/[\\d]+/[\\w]+.html";
+//		String url = "http://mili.cn.yahoo.com/";
+//		String urlFilter = "http://mili.cn.yahoo.com/ypen/20110620/[\\d]+.html";
+		LinkParser parser = new LinkParser();
+		parser.setUrl(url);
+		parser.setUrlFilter(urlFilter);
+		links = parser.filterLinks();
+		for(Iterator it = links.iterator();it.hasNext();){
+			System.out.println(it.next().toString());
+		}
+		System.out.println(url);
+		System.out.println(urlFilter);
+	}
+}
+
