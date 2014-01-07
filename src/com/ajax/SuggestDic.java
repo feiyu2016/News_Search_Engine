@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 public class SuggestDic {
@@ -77,7 +78,7 @@ public class SuggestDic {
     private TSTNode root;
 
 	public static String getDir()
-	{	//在一个{}里可以直接这样利用return语句
+	{	//鍦ㄤ竴涓獅}閲屽彲浠ョ洿鎺ヨ繖鏍峰埄鐢╮eturn璇彞
 		String dir = System.getProperty("dic.dir");
 		if (dir == null)
 			dir = "/dic/";
@@ -93,7 +94,7 @@ public class SuggestDic {
 	 * @return the singleton of Binary gram dictionary
 	 */
 	public static SuggestDic getInstance()
-	{	//这里的return语句只是起到调度另外一个函数的作用
+	{	//杩欓噷鐨剅eturn璇彞鍙槸璧峰埌璋冨害鍙﹀涓�釜鍑芥暟鐨勪綔鐢�
 		return dicSug;
 	}
 	
@@ -112,10 +113,13 @@ public class SuggestDic {
 	 */
 	public SuggestDic(String dic){
 		System.out.println(SuggestDic.getDir()+dic);
+		HashMap<String,Integer> sugMap =new HashMap<String,Integer>();
+		HashMap<String,Integer> logMap =new HashMap<String,Integer>();
+		
 		try{
 			InputStream file = null;
 			if (System.getProperty("dic.dir") == null)
-				//这里就有关于获得相对路径的做法。
+				//杩欓噷灏辨湁鍏充簬鑾峰緱鐩稿璺緞鐨勫仛娉曘�
 				file = getClass().getResourceAsStream(SuggestDic.getDir()+dic);
 			else
 				file = new FileInputStream(new File(SuggestDic.getDir()+dic));
@@ -130,6 +134,7 @@ public class SuggestDic {
 				StringTokenizer st = new StringTokenizer(word,"%" );
 				
 				String key = st.nextToken();
+				sugMap.put(key, 0);
 				occur=Integer.parseInt(st.nextToken());
 				weight=Integer.parseInt(st.nextToken());
 				if (root == null) {
@@ -179,6 +184,111 @@ public class SuggestDic {
 				}
 			}
 			in.close();
+		}catch( IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		try{
+			
+			String pathname ="";
+			File path =null;
+			if (System.getProperty("log.dir") == null)
+				pathname = "D:/search/log";
+			else
+				pathname = System.getProperty("log.dir");
+			
+			path =new File(pathname);
+			File[] filearray =path.listFiles();
+			
+			for (int i=0;i<filearray.length;i++)
+			{
+				String filename =filearray[i].getName();
+				if (!filename.endsWith("log"))
+					continue;
+				
+				FileInputStream fileInputStream = new FileInputStream(pathname + "/"+ filename);
+				InputStreamReader fsr = new InputStreamReader(fileInputStream);
+
+				BufferedReader br = new BufferedReader(fsr);
+				String word;
+				while ((word = br.readLine()) != null) {
+					StringTokenizer st = new StringTokenizer(word,"|" );
+					
+					String key = st.nextToken();
+					key =st.nextToken();
+					key =st.nextToken();
+					if (key ==null)
+						continue;
+					
+					if (sugMap.containsKey(key))
+						continue;
+					if (logMap.containsKey(key))
+					{
+						int val =logMap.remove(key);
+						logMap.put(key, val);
+					}
+					else
+					{
+						logMap.put(key, 1);
+					}
+				}
+				br.close();
+			}
+			
+			int occur=0;
+			int weight = 0;
+			for(String key: logMap.keySet()) {
+				
+				occur=logMap.get(key);
+				weight =1000;
+				if (root == null) {
+					root = new TSTNode(key.charAt(0), null);
+				}
+				TSTNode node = null;
+				if (key.length() > 0 && root != null) {
+					TSTNode currentNode = root;
+					int charIndex = 0;
+					while (true) {
+						if (currentNode == null)
+							break;
+						int charComp =							
+								(key.charAt(charIndex)-
+								currentNode.splitchar);
+						if (charComp == 0) {
+							charIndex++;
+							if (charIndex == key.length()) {
+								node = currentNode;
+								break;
+							}
+							currentNode = currentNode.EQKID;
+						} else if (charComp < 0) {
+							currentNode = currentNode.LOKID;
+						} else {
+							currentNode = currentNode.HIKID;
+						}
+					}
+					int occur2 = 0;
+					if (node != null)
+					{
+						occur2 = node.data;
+					}
+					if (occur2 != 0) {
+						occur+=occur2;
+					}
+					currentNode =
+						getOrCreateNode(key);
+	
+					occur2 = currentNode.data;
+					if (occur2 != 0) {
+						//System.out.println("add");
+						occur+=occur2;
+					}
+					currentNode.data = occur;
+					currentNode.weight = weight;
+				}
+			}
+			
 		}catch( IOException e)
 		{
 			e.printStackTrace();

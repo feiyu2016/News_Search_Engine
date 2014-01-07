@@ -1,8 +1,13 @@
 eclipse.preferences.version=1
 encoding//src/com/_163/_163NewCollection.java=UTF-8
+encoding//src/com/ajax/SuggestDic.java=UTF-8
 encoding//src/com/ajax/testMatchPrefix.java=UTF-8
 encoding//src/com/bitmechanic/listlib/InitTag.java=UTF-8
 encoding//src/com/bitmechanic/searchpage/Search.java=UTF-8
+encoding//src/com/crawler/Crawler163.java=UTF-8
+encoding//src/com/crawler/CrawlerSina.java=UTF-8
+encoding//src/com/crawler/CrawlerSohu.java=UTF-8
 encoding//src/com/crawler/LinkParser.java=UTF-8
+encoding//src/com/lucene/addIndex.java=UTF-8
 encoding//src/com/sina/SinaNewCollection.java=UTF-8
 encoding//src/com/sohu/SohuNews.java=UTF-8

@@ -24,21 +24,38 @@ public class PrompterServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request,HttpServletResponse response)throws IOException {
 
 		String queryTerm = request.getParameter("query");
-		System.out.print("++++++++++++"+queryTerm);
+		System.out.print(queryTerm);
 		//在这里获得词典的前缀匹配
-		TSTItem[] t=dic.matchPrefix(queryTerm, 10);
+		TSTItem[] t=dic.matchPrefix(queryTerm, 20);
 		if(t!=null){
-		System.out.print("!!!!!!!!!!!!"+t.length+"fffffff");
 		StringBuilder message = new StringBuilder("<ul>");
 		try {
 			for(int i=0;i<t.length;i++)
 			{
-	            message.append("<li style=\"font-size:12px;padding:0px;height:15px;line-height:15px;overflow:hidden\"><div style=\"text-align:left;float:left\">");
+				if (t[i].weight<100)
+					continue;
+				message.append("<li style=\"font-size:12px;background-color:#ffD000;padding:0px;height:15px;line-height:15px;overflow:hidden\"><div style=\"text-align:left;float:left\">");
 	           //message.append(i);
 	            message.append("</div><div style=\"text-align:right;float:right\"><span class=\"informal\">");
 	           //message.append(i);
 	           // message.append("<font color=\"#009900\">结果</font></span>ffffffffffff</div></li>");
 	            message.append("<font color=\"#009900\"></font></span>");
+	            
+	            message.append(t[i].key);
+	            message.append("</div></li>");
+			}
+			
+			for(int i=0;i<t.length;i++)
+			{
+				if (t[i].weight>=100)
+					continue;
+				message.append("<li style=\"font-size:12px;padding:0px;height:15px;line-height:15px;overflow:hidden\"><div style=\"text-align:left;float:left\">");
+	           //message.append(i);
+	            message.append("</div><div style=\"text-align:right;float:right\"><span class=\"informal\">");
+	           //message.append(i);
+	           // message.append("<font color=\"#009900\">结果</font></span>ffffffffffff</div></li>");
+	            message.append("<font color=\"#009900\"></font></span>");
+	            
 	            message.append(t[i].key);
 	            message.append("</div></li>");
 			}

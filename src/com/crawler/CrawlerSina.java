@@ -5,7 +5,7 @@ import java.util.Set;
 
 /**
  *
- * @author guanminglin <guanminglin@gmail.com>
+ * @author ywen qin <qywsjtu@gmail.com>
  */
 public class CrawlerSina {
 
@@ -13,19 +13,20 @@ public class CrawlerSina {
     static public String mil_regex ="http://mil.news.sina.com.cn/\\d*-\\d*-\\d*/[\\d]+.html";
     static public String tech_regex ="http://tech.sina.com.cn/[i|it]/\\d*-\\d*-\\d*/[\\d]+.shtml";
     static public String new_regex ="http://news.sina.com.cn/[w|s|c]/\\d*-\\d*-\\d*/[\\d]+.shtml";
-
-    /* 使用种子 url 初始化 URL 队列*/
+    private int crawled_num =0;
+    private int MAX_NUM =200;
+    
+    /* 浣跨敤绉嶅瓙 url 鍒濆鍖�URL 闃熷垪*/
     private void initCrawlerWithSeeds(String[] seeds) {
         for (int i = 0; i < seeds.length; i++) {
             LinkDB.addUnvisitedUrl(seeds[i]);
         }
     }
 
-    /* 爬取方法*/
+    /* 鐖彇鏂规硶*/
     public void crawling(String[] seeds) {
         LinkFilter filter = new LinkFilter() {
-            //提取以 http://www.twt.edu.cn 开头的链接
-
+            //鎻愬彇浠�http://www.twt.edu.cn 寮�ご鐨勯摼鎺�
             public boolean accept(String url) {
                 if (url.matches(mil_regex)) {
                     return true;
@@ -45,23 +46,23 @@ public class CrawlerSina {
             	return true;*/
             }
         };
-        //初始化 URL 队列
+        //鍒濆鍖�URL 闃熷垪
         initCrawlerWithSeeds(seeds);
-        //循环条件：待抓取的链接不空且抓取的网页不多于 1000
+        //寰幆鏉′欢锛氬緟鎶撳彇鐨勯摼鎺ヤ笉绌轰笖鎶撳彇鐨勭綉椤典笉澶氫簬 1000
         while (!LinkDB.unVisitedUrlsEmpty() && LinkDB.getVisitedUrlNum() <= 100) {
-            
+            if (crawled_num >MAX_NUM)
+            	break;
            
-            //队头 URL 出对
+            //闃熷ご URL 鍑哄
             String visitUrl = LinkDB.unVisitedUrlDeQueue();
             if (visitUrl == null) {
                 
                 continue;
             }
-           //该 url 放入到已访问的 URL 中
-            LinkDB.addVisitedUrl(visitUrl);
-            //提取出下载网页中的 URL
+           //璇�url 鏀惧叆鍒板凡璁块棶鐨�URL 涓�            LinkDB.addVisitedUrl(visitUrl);
+            //鎻愬彇鍑轰笅杞界綉椤典腑鐨�URL
             Set<String> links = LinkParser.extracLinks(visitUrl, filter);
-            //新的未访问的 URL 入队
+            //鏂扮殑鏈闂殑 URL 鍏ラ槦
             for (String link : links) {
                 LinkDB.addUnvisitedUrl(link);
                 System.out.println(link);
@@ -70,7 +71,7 @@ public class CrawlerSina {
         }
     }
 
-    //main 方法入口，更加base url 进行分析
+    //main 鏂规硶鍏ュ彛锛屾洿鍔燽ase url 杩涜鍒嗘瀽
     public static void main(String[] args) {
         CrawlerSina crawler = new CrawlerSina();
         crawler.crawling(new String[]{"http://tech.sina.com.cn/"});

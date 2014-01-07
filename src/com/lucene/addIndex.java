@@ -78,7 +78,7 @@ import com.sohu.db.ConnectionManager;
 
 public class addIndex {
 	private Connection con = null;
-    private ConnectionManager manager = null;    //数据库连接管理器。
+    private ConnectionManager manager = null;    //鏁版嵁搴撹繛鎺ョ鐞嗗櫒銆�
 	private boolean autoCommit=true;
 	private String indexPath =null;
 	
@@ -110,10 +110,12 @@ public class addIndex {
 			e.printStackTrace();
 		}
 		
+		System.out.println("Adding files into new index ...");
 		String sql="select * from news where indexed =0";
 		boolean flag=true;
 		ResultSet rs=null;
 		Document doc= null;
+		int numFile =0;
 		try 
 		{
 			st =con.createStatement();
@@ -159,7 +161,7 @@ public class addIndex {
 				doc.add(new Field("title",newstitle,Field.Store.YES,Field.Index.TOKENIZED,Field.TermVector.WITH_POSITIONS_OFFSETS));
 				doc.add(new Field("body",newscontent,Field.Store.YES,Field.Index.TOKENIZED,Field.TermVector.WITH_POSITIONS_OFFSETS));
 				doc.add(new Field("date",newsdate,Field.Store.YES,Field.Index.UN_TOKENIZED));
-				doc.add(new Field("source",source,Field.Store.YES,Field.Index.UN_TOKENIZED));
+				doc.add(new Field("source",source,Field.Store.YES,Field.Index.TOKENIZED));
 				System.out.print (newstitle+'\n');
 				try {  
 					writer.addDocument(doc);
@@ -169,6 +171,8 @@ public class addIndex {
 				} catch (IOException e) {  
 					e.printStackTrace();  
 				}  
+				numFile +=1;
+				
 			}
 		}
 		catch(Exception e)
@@ -185,13 +189,21 @@ public class addIndex {
 			e.printStackTrace();
 		}
 		manager.close();
-		
+		System.out.println("Finishes!");
+		System.out.println(String.valueOf(numFile)+" Files Added to Index");
 	}
 	
     
     public static void main(String args[]) throws SQLException
     {
-    	addIndex a =new addIndex("D:/indextmp");
+    	System.out.println(args[0]);
+    	String path ="";
+    	if (args.length ==0)
+    		path ="E:/indextmp";
+    	else
+    		path =args[0];
+    	
+    	addIndex a =new addIndex(path);
     	a.add();
     	
     }

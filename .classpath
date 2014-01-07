@@ -17,15 +17,15 @@
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/pager-taglib.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/seg.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/standard.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/javax.servlet.jsp.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/htmllexer.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/mysql-connector-java-5.1.6-bin.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/junit-dep-4.10.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/lucene-core-2.3.1.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/javax.servlet.jar"/>
 	<classpathentry kind="lib" path="E:/apache/apache-tomcat-5.5.20/webapps/ROOT/WEB-INF/lib/paoding-analysis.jar"/>
-	<classpathentry kind="lib" path="E:/apache/newsCollection/WebRoot/WEB-INF/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="E:/apache/apache-tomcat-5.5.20/webapps/ROOT/WEB-INF/lib/lucene-core-2.3.1.jar"/>
-	<classpathentry kind="lib" path="E:/apache/apache-tomcat-5.5.20/webapps/ROOT/WEB-INF/lib/javax.servlet.jar"/>
-	<classpathentry kind="lib" path="E:/自己动手搜索引擎/第7章/News_Search/WebRoot/WEB-INF/lib/javax.servlet.jsp.jar"/>
-	<classpathentry kind="lib" path="E:/自己动手搜索引擎/第7章/News_Search/WebRoot/WEB-INF/lib/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="E:/自己动手搜索引擎/第7章/News_Search/WebRoot/WEB-INF/lib/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="E:/自己动手搜索引擎/第7章/News_Search/WebRoot/WEB-INF/lib/htmllexer.jar"/>
-	<classpathentry kind="lib" path="E:/自己动手搜索引擎/第7章/News_Search/WebRoot/WEB-INF/lib/mysql-connector-java-5.1.6-bin.jar"/>
-	<classpathentry kind="lib" path="E:/自己动手搜索引擎/第7章/News_Search/WebRoot/WEB-INF/lib/junit-dep-4.10.jar"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
 </classpath>

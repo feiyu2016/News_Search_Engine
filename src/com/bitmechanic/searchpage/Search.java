@@ -7,8 +7,10 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.highlight.Highlighter;
@@ -40,6 +42,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.IOException;
@@ -66,7 +70,6 @@ import net.paoding.analysis.analyzer.PaodingAnalyzer;
 public class Search implements ListCreator {
 
 	private static String[] cats = null;
-	private static JpAnalyzer analyzer = new JpAnalyzer();
 	private static QueryParser bodyParser = new QueryParser("body", new PaodingAnalyzer());
 	private static QueryParser titleParser = new QueryParser("title", new PaodingAnalyzer());
 	private static QueryParser sourceParser = new QueryParser("source", new PaodingAnalyzer());
@@ -80,6 +83,7 @@ public class Search implements ListCreator {
 	private static String _dir;
 	private IndexReader reader = null;
 	private Searcher searcher = null;
+	private File file =null;
 	private String _query;
 	
 	private static long interview = 60000L;
@@ -93,13 +97,28 @@ public class Search implements ListCreator {
 			reader.close();
 		_dir = indexPath;
 		//璁剧疆绯荤粺杩愯鎵�渶瑕佺殑灞炴�
-		System.setProperty("index.dir", "D:/index");
+		System.setProperty("index.dir", "E:/index");
 		System.setProperty("dic.dir", "D:/dic");
-		System.out.println("绱㈠紩鍓峣nit====" + indexPath);
-		System.out.println("鍓峣");
+		System.setProperty("log.dir", "D:/search/log");
+		
+		if (!existFile())
+		{
+			try {
+				file = new File(getLogName());
+				file.createNewFile();
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			file =new File(getLogName());
+		}
+		
 		searcher = new IndexSearcher(indexPath);
 		reader = IndexReader.open(indexPath);
-		System.out.println("绱㈠紩鍚巌ndex.dir======" + indexPath);
 	}
 	public void reinit() throws Exception{
 		if(searcher != null)
@@ -124,40 +143,89 @@ public class Search implements ListCreator {
 		}
 	}
 	
-    public String queryProcess(String queryInput)
+	private static String getLogName() {
+        StringBuffer logPath = new StringBuffer();
+        logPath.append(System.getProperty("log.dir"));
+        File file = new File(logPath.toString());
+        if (!file.exists())
+            file.mkdir();
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        logPath.append("/"+sdf.format(new Date())+".log");
+        
+        return logPath.toString();
+    }
+	
+	public static boolean existFile(){
+		String filename =getLogName();
+		File file = new File(filename);
+		return (file.exists());
+	}
+	
+	/*parse query input
+	 * for example: 体育游戏    will be searched as 体育，游戏 respectively
+	 */
+	
+    public ArrayList<String> queryProcess(String queryInput)
     {
+    	PaodingAnalyzer analyzer =new PaodingAnalyzer();
     	String[] tempStr=queryInput.split(" ");
-    	int len=tempStr.length;
-    	String result="";
+    	ArrayList<String> queryResult =new ArrayList<String>();
     	int i=0;
-    	while (i<len)
+    	while (i<tempStr.length)
     	{
-    		if (tempStr[i].length()!=0)
+    		if (tempStr.length ==0)
     		{
-    			result=result+"+";
-    			result=result+tempStr[i];
-    			result=result+" ";
+    			i++;
+    			continue;
     		}
-    		i=i+1;
+    		
+    		TokenStream source =analyzer.tokenStream("", new StringReader(tempStr[i]));
+    		Token term;
+    		while (true)
+    		{
+    			try{
+    				term =source.next();
+    			}
+    			catch (IOException e)
+    			{
+    				term =null;
+    			}
+			
+    			if (term == null)
+    				break;
+			
+    			if (term.termText().length() !=0)
+    				queryResult.add(term.termText());
+    			
+    		}
+    		i++;
     		
     	}
-    	return result;
+    	return queryResult;
     }
     
 	public synchronized ListDesc search(int category, String queryString,
 			int offset, int max, boolean sortBydate, boolean refind,
 			String inputstr) throws Exception {
-		Query bodyQuery = null, titleQuery = null, sourceQuery = null, query = null;
+		Query bodyQuery = null, titleQuery = null, sourceQuery = null, query = null,bodyOrTitleQuery = null;
 		TokenStream tokenStream = null;
 		this.refreshIndexReader();
 		System.out.println("QueryString is:"+_query);
-		queryString=queryProcess(queryString);
+		ArrayList<String> queryProcess=queryProcess(queryString);
 		BooleanQuery bodyOrTitle = new BooleanQuery();
-        bodyQuery = bodyParser.parse(queryString);
-		titleQuery = titleParser.parse(queryString);
+		BooleanQuery tmpQuery =new BooleanQuery();
+		
+		for (int i=0; i<queryProcess.size(); i++)
+		{
+			bodyQuery = bodyParser.parse(queryProcess.get(i));
+			titleQuery = titleParser.parse(queryProcess.get(i));
 
-		bodyOrTitle.add(bodyQuery, BooleanClause.Occur.MUST);
-		bodyOrTitle.add(bodyQuery, BooleanClause.Occur.MUST);
+			tmpQuery.add(bodyQuery, BooleanClause.Occur.SHOULD);
+			tmpQuery.add(titleQuery, BooleanClause.Occur.SHOULD);
+		}
+		
+		bodyOrTitle.add(tmpQuery,BooleanClause.Occur.MUST);
 		
 		if (!inputstr.equals("全部"))
 		{
@@ -171,21 +239,26 @@ public class Search implements ListCreator {
 		Hits hits = null;
 		try {
 			query = bodyOrTitle.rewrite(reader);
-			if (sortBydate) {
-				Sort dateSort = new Sort("timestamp", false);
-				hits = searcher.search(query, dateSort);
-			} else
-			{
-				hits = searcher.search(query);
-			}
+			bodyOrTitleQuery =tmpQuery.rewrite(reader);
+			
+			Sort scoresort = new Sort(new SortField[]  
+                        {  
+                               //如果两个都没有注释，那么就是按照先按照相关度，然后按照id排序（相关度相同的情况下）  
+                                SortField.FIELD_SCORE,//注释掉这个就是按照id排序  
+                                new SortField("postId", SortField.INT, false)//注释掉这个就是按照相关度排序  
+                        }  
+                );  
+				
+			hits = searcher.search(query,scoresort);
+			
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 			return null;
 		}
 		
 		// 瀵瑰叧閿瓧杩涜楂樹寒澶勭悊
-		Highlighter highlighter = new Highlighter(new SimpleFormatter(),
-				new QueryScorer(query));
+		Highlighter highlighter = new Highlighter(new HighlightFormatter(),
+				new QueryScorer(bodyOrTitleQuery));
 		highlighter.setTextFragmenter(new SimpleFragmenter(descLenth));
 		ArrayList list = new ArrayList(hits.length());
 		// 鐪熸鐨勫垎椤垫墜鑴氭槸鍦ㄨ繖閲屽仛鐨�涓昏灏辨槸瀵圭粨鏋滈泦鐨勫惊鐜鐞�
@@ -275,6 +348,36 @@ public class Search implements ListCreator {
 		_query = query;
 	}
 
+	public void logwrite(String query)
+	{
+		FileWriter filewriter =null;
+		String queryLog ="";
+		try{
+			filewriter =new FileWriter(file,true);
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			queryLog =df.format(new Date())+ "|RUN|" +query +"\r\n";
+			System.out.println(queryLog);
+			filewriter.write(queryLog);
+			filewriter.flush();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				filewriter.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
 	/**
 	 * Runs a query against the index in the directory specified. Returns a list
 	 * of HashMap objects. The objects have the following keys: 'url', 'title',
@@ -304,6 +407,7 @@ public class Search implements ListCreator {
 		System.out.println("query is :"+context.getRequest().getParameter("query"));
 		System.out.println("site is :"+context.getRequest().getParameter("sel"));
 		ListDesc desc = search(1, _query, offset, max, false, ref, inputstr);
+		logwrite(_query);
 		return new ListContainer(desc.list.iterator(), desc.count);
 	}
 	
@@ -312,18 +416,20 @@ public class Search implements ListCreator {
 		search.init("D:/index");
 		System.setProperty("dic", "D:/dic");
 		System.out.println(System.getProperty("dic"));
-		String result=search.queryProcess("fff");
-		System.out.println(result);
+		System.out.println(getLogName());
+		//String result=search.queryProcess("fff");
+		//System.out.println(result);
 		//Query bodyQuery = null, titleQuery = null, query = null;
 		//bodyQuery = bodyParser.parse("g");
 		search.setQuery("2");
-		search.search(1, "2", 1, 10, false, false, "");
+		//search.search(1, "2", 1, 10, false, false, "");
 		//System.err.println("fffffffffff");//鎵撳嵃鍑烘潵鏄孩鑹茬殑銆�
+		
 	}
 }
 
 // 鍦ㄨ繖閲屽彲浠ユ帶鍒堕绾㈢殑鏍峰紡銆�
-class SimpleFormatter implements Formatter {
+class HighlightFormatter implements Formatter {
 	int numHighlights = 0;
 
 	public String highlightTerm(String originalText, TokenGroup group) {

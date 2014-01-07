@@ -197,7 +197,13 @@ public class createIndex {
 	public static void main(String args[]) throws SQLException
 	{
 		//System.out.print("2222\n");
-		createIndex c=new createIndex("D:/indextmp");
+		String path ="";
+		if (args.length ==0)
+			path ="E:/index";
+		else
+			path =args[0];
+		
+		createIndex c=new createIndex(path);
 		c.create();
 		
 	}
